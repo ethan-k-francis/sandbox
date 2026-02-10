@@ -14,8 +14,8 @@ venv/
 *.egg-info/
 .eggs/
 
-# Local hooks (stay local only)
-.githooks/
+# Local hook overrides (if needed)
+.githooks/local/
 
 # IDE and OS
 .cursor/

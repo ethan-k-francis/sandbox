@@ -32,8 +32,8 @@ sandbox/
 # 1. Clone and enter the repo
 cd ~/repositories/sandbox
 
-# 2. Install pre-commit hooks
-pip install pre-commit && pre-commit install
+# 2. Install git hooks (linting + commit message cleanup)
+make install-hooks
 
 # 3. See all available commands
 make help
@@ -216,6 +216,7 @@ The patterns are the same regardless of language:
 
 - Feature branches: `efrancis/feature/descriptive-name`
 - PRs for all changes (never push to main directly)
+- Git hooks auto-clean commit messages and run linters (installed via `make install-hooks`)
 
 ## Repo-Level Commands
 

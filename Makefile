@@ -9,7 +9,7 @@
 # =============================================================================
 
 .PHONY: help lint lint-fix lint-update lint-yaml lint-markdown lint-python \
-       test clean update-deps git-clean-branches git-status
+       test clean update-deps git-clean-branches git-status install-hooks
 
 # Default target
 .DEFAULT_GOAL := help
@@ -29,6 +29,26 @@ help: ## Show this help
 	@echo ""
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-20s$(NC) %s\n", $$1, $$2}'
 	@echo ""
+
+# =============================================================================
+# Setup & Installation
+# =============================================================================
+install-hooks: ## Install git hooks (pre-commit + custom hooks)
+	@echo "$(CYAN)Installing git hooks...$(NC)"
+	@if ! command -v pre-commit >/dev/null 2>&1; then \
+		echo "$(YELLOW)pre-commit not found. Installing...$(NC)"; \
+		pip install pre-commit || (echo "$(YELLOW)Failed to install pre-commit. Install manually: pip install pre-commit$(NC)" && exit 1); \
+	fi
+	@pre-commit install
+	@echo "$(CYAN)Configuring custom git hooks from .githooks/...$(NC)"
+	@git config core.hooksPath .githooks
+	@echo "$(GREEN)Git hooks installed successfully!$(NC)"
+	@echo ""
+	@echo "Custom hooks enabled:"
+	@echo "  - prepare-commit-msg: Strips Co-authored-by trailers from IDE extensions"
+	@echo ""
+	@echo "Pre-commit hooks enabled:"
+	@echo "  Run 'pre-commit run --all-files' to see all configured hooks"
 
 # =============================================================================
 # Linting & Validation
