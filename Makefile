@@ -8,7 +8,7 @@
 #   make lint        Run all linters
 # =============================================================================
 
-.PHONY: help lint lint-fix lint-update lint-yaml lint-markdown lint-python \
+.PHONY: help setup-hooks lint lint-fix lint-update lint-yaml lint-markdown lint-python \
        test clean update-deps git-clean-branches git-status
 
 # Default target
@@ -29,6 +29,13 @@ help: ## Show this help
 	@echo ""
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-20s$(NC) %s\n", $$1, $$2}'
 	@echo ""
+
+# =============================================================================
+# Setup
+# =============================================================================
+setup-hooks: ## Configure local git hooks (strips IDE trailers from commits)
+	@git config core.hooksPath .githooks
+	@echo "$(GREEN)Git hooks configured (.githooks/)$(NC)"
 
 # =============================================================================
 # Linting & Validation
