@@ -15,6 +15,10 @@ charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
 
+[*.go]
+# Go uses gofmt with tab indentation; override global space setting
+indent_style = tab
+
 [*.{yml,yaml}]
 indent_size = 2
 
