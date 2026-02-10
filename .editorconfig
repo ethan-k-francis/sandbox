@@ -1,0 +1,26 @@
+# =============================================================================
+# EditorConfig — Consistent formatting across editors
+# =============================================================================
+# https://editorconfig.org
+# Most editors support this natively or via plugin.
+# =============================================================================
+
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.{yml,yaml}]
+indent_size = 2
+
+[*.md]
+# Markdown uses trailing spaces for line breaks
+trim_trailing_whitespace = false
+
+[Makefile]
+indent_style = tab

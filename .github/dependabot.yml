@@ -3,7 +3,7 @@
 # Dependabot Configuration
 # =============================================================================
 # Automatically checks for outdated dependencies and creates PRs.
-# Keeps GitHub Actions dependencies current.
+# Keeps GitHub Actions, Python, and Go dependencies current.
 #
 # Grouping: batches related updates into fewer PRs to reduce noise.
 # PR limit: caps open Dependabot PRs to avoid overwhelming the review queue.
@@ -25,4 +25,36 @@ updates:
     groups:
       # Batch all GH Actions updates into a single PR
       actions:
+        patterns: ["*"]
+
+  # Python — example CLI project dependencies
+  - package-ecosystem: pip
+    directory: /projects/_example-python-cli
+    schedule:
+      interval: weekly
+      day: monday
+    labels:
+      - dependencies
+      - python
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 3
+    groups:
+      python-deps:
+        patterns: ["*"]
+
+  # Go — example API project dependencies
+  - package-ecosystem: gomod
+    directory: /projects/_example-go-api
+    schedule:
+      interval: weekly
+      day: monday
+    labels:
+      - dependencies
+      - go
+    commit-message:
+      prefix: "deps"
+    open-pull-requests-limit: 3
+    groups:
+      go-deps:
         patterns: ["*"]

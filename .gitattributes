@@ -1,4 +1,35 @@
+# =============================================================================
+# Git Attributes — Line endings and binary file handling
+# =============================================================================
+
+# Auto-detect text files and normalize line endings
 * text=auto
+
+# Force LF line endings for all source files
+*.py text eol=lf
+*.go text eol=lf
+*.js text eol=lf
+*.ts text eol=lf
 *.sh text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.toml text eol=lf
 *.conf text eol=lf
+*.cfg text eol=lf
 Makefile text eol=lf
+
+# Mark binary files so Git doesn't try to diff them
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.tar.gz binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
