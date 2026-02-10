@@ -18,6 +18,9 @@ insert_final_newline = true
 [*.{yml,yaml}]
 indent_size = 2
 
+[*.go]
+indent_style = tab
+
 [*.md]
 # Markdown uses trailing spaces for line breaks
 trim_trailing_whitespace = false
