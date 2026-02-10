@@ -23,6 +23,7 @@
 import click
 from rich.console import Console
 
+from example_cli.config import load_config
 from example_cli.core import build_greeting
 
 # Rich console for pretty terminal output (colors, formatting)
@@ -47,8 +48,9 @@ def greet(name: str, loud: bool, count: int) -> None:
 
     NAME is the person to greet (required).
     """
-    # Build the greeting using core business logic (separated from CLI layer)
-    greeting = build_greeting(name, loud=loud)
+    # Load configuration (env vars → defaults) and build the greeting
+    config = load_config()
+    greeting = build_greeting(name, loud=loud, template=config.greeting_template)
 
     # Print the greeting the requested number of times
     for _ in range(count):

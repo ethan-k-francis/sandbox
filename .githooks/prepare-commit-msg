@@ -1,3 +1,4 @@
 #!/bin/bash
-# Strip Co-authored-by trailers added by IDE extensions
+# Strip Co-authored-by trailers added by IDE extensions.
+# Uses sed -i.bak for macOS/BSD portability, then cleans up the backup.
 sed -i.bak '/^Co-authored-by: Cursor/d' "$1" && rm -f "$1.bak"
