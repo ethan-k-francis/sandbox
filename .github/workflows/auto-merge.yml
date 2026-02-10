@@ -33,6 +33,11 @@ name: Auto-Merge
     workflows: ["CI"]
     types: [completed]
 
+# Prevent duplicate merge attempts for the same PR
+concurrency:
+  group: auto-merge-${{ github.event.pull_request.number || github.event.workflow_run.head_branch }}
+  cancel-in-progress: true
+
 # Need write access to merge the PR and read checks
 permissions:
   contents: write
