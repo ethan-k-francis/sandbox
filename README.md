@@ -32,8 +32,8 @@ sandbox/
 # 1. Clone and enter the repo
 cd ~/repositories/sandbox
 
-# 2. Install pre-commit hooks
-pip install pre-commit && pre-commit install
+# 2. Install pre-commit hooks (linting + commit message cleanup)
+pip install pre-commit && pre-commit install --hook-type pre-commit --hook-type prepare-commit-msg
 
 # 3. See all available commands
 make help

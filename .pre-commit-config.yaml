@@ -87,6 +87,17 @@ repos:
       - id: markdownlint
         args: [--config, .markdownlint.yaml]
 
+  # ---------------------------------------------------------------------------
+  # Commit Message: Strip unwanted IDE trailers
+  # ---------------------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: strip-ide-trailers
+        name: Strip IDE Co-authored-by trailers
+        entry: .pre-commit-hooks/strip-ide-trailers.sh
+        language: script
+        stages: [prepare-commit-msg]
+
 # Default stages
 default_stages: [pre-commit]
 
