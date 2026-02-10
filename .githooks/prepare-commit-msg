@@ -1,3 +1,3 @@
 #!/bin/bash
 # Strip Co-authored-by trailers added by IDE extensions
-sed -i '/^Co-authored-by: Cursor/d' "$1"
+sed -i.bak '/^Co-authored-by: Cursor/d' "$1" && rm -f "$1.bak"
