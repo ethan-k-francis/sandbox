@@ -22,5 +22,9 @@ indent_size = 2
 # Markdown uses trailing spaces for line breaks
 trim_trailing_whitespace = false
 
+[*.go]
+# Go uses gofmt which enforces tab indentation
+indent_style = tab
+
 [Makefile]
 indent_style = tab
