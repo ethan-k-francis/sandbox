@@ -18,12 +18,18 @@
 # =============================================================================
 
 
-def build_greeting(name: str, *, loud: bool = False) -> str:
+def build_greeting(
+    name: str,
+    *,
+    loud: bool = False,
+    template: str = "Hello, {name}!",
+) -> str:
     """Build a greeting string for the given name.
 
     Args:
         name: The person's name to greet.
         loud: If True, return the greeting in uppercase.
+        template: A format string with a ``{name}`` placeholder.
 
     Returns:
         The formatted greeting string.
@@ -34,7 +40,7 @@ def build_greeting(name: str, *, loud: bool = False) -> str:
         >>> build_greeting("Bob", loud=True)
         'HELLO, BOB!'
     """
-    greeting = f"Hello, {name}!"
+    greeting = template.format(name=name)
 
     if loud:
         greeting = greeting.upper()
