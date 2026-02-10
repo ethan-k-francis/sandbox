@@ -31,7 +31,7 @@ jobs:
     steps:
       # SHA-pinned for supply-chain security (tag: v6)
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       # SHA-pinned for supply-chain security (tag: v6)
       - name: Set up Python
@@ -51,7 +51,7 @@ jobs:
 
       # SHA-pinned for supply-chain security (tag: v5)
       - name: Cache pre-commit hook environments
-        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -72,7 +72,7 @@ jobs:
     steps:
       # SHA-pinned for supply-chain security (tag: v6)
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       # SHA-pinned for supply-chain security (tag: v6)
       - name: Set up Python
