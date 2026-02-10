@@ -35,7 +35,7 @@ class TestBuildGreeting:
     def test_not_loud_by_default(self) -> None:
         """Loud should be False by default (no shouting unless asked)."""
         result = build_greeting("Charlie")
-        assert result == result  # Not uppercase
+        assert result == "Hello, Charlie!"
         assert result[0] == "H"  # Starts with capital H, not all caps
 
     def test_empty_name(self) -> None:
