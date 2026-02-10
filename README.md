@@ -1,3 +1,7 @@
+[![CI](https://github.com/ethan-k-francis/sandbox/actions/workflows/ci.yml/badge.svg)](https://github.com/ethan-k-francis/sandbox/actions/workflows/ci.yml)
+[![Security](https://github.com/ethan-k-francis/sandbox/actions/workflows/security.yml/badge.svg)](https://github.com/ethan-k-francis/sandbox/actions/workflows/security.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 # Sandbox
 
 Experiments, prototypes, and learning projects. This is the place to try new languages,
