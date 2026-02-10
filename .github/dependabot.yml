@@ -1,0 +1,28 @@
+---
+# =============================================================================
+# Dependabot Configuration
+# =============================================================================
+# Automatically checks for outdated dependencies and creates PRs.
+# Keeps GitHub Actions dependencies current.
+#
+# Grouping: batches related updates into fewer PRs to reduce noise.
+# PR limit: caps open Dependabot PRs to avoid overwhelming the review queue.
+# =============================================================================
+version: 2
+updates:
+  # GitHub Actions — pin to latest tagged release
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    labels:
+      - dependencies
+      - ci
+    commit-message:
+      prefix: "ci"
+    open-pull-requests-limit: 5
+    groups:
+      # Batch all GH Actions updates into a single PR
+      actions:
+        patterns: ["*"]

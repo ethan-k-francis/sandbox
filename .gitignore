@@ -1,0 +1,87 @@
+# Secrets and env
+.env
+.env.*
+.env.example
+*.pem
+*.key
+secrets/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.eggs/
+
+# IDE and OS
+.cursor/
+cursor-environment/
+.idea/
+.vscode/
+*.code-workspace
+*.swp
+.DS_Store
+Thumbs.db
+
+# Testing and coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Go
+*.test
+*.out
+
+# Rust
+target/
+
+# C++ / C#
+*.o
+*.obj
+*.lib
+*.a
+*.pdb
+
+# .NET / C#
+bin/
+obj/
+*.user
+*.suo
+
+# Node / TypeScript
+node_modules/
+dist/
+
+# Build and artifacts
+build/
+*.so
+*.dll
+*.exe
+*.dylib
+
+# Temporary and backup files
+*.bak
+*.tmp
+*.backup
+*.old
+*.orig
+*.rej
+*.swo
+*~
+
+# Logs and local data
+*.log
+logs/
+.cache/
+
+# direnv
+.direnv/
+.envrc
+.envrc.example
+.envrc.local

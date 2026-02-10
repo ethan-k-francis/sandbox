@@ -1,0 +1,72 @@
+---
+# =============================================================================
+# Markdownlint Configuration
+# =============================================================================
+# Docs: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+# =============================================================================
+
+# Default state for all rules
+default: true
+
+# MD003 - Heading style
+MD003:
+  style: atx  # Use # for headings
+
+# MD004 - Unordered list style
+MD004:
+  style: dash  # Use - for lists
+
+# MD007 - Unordered list indentation
+MD007:
+  indent: 2
+
+# MD013 - Line length
+MD013: false  # Disable line length (editors handle wrapping)
+
+# MD024 - Multiple headings with same content
+MD024:
+  siblings_only: true  # Allow same heading in different sections
+
+# MD025 - Multiple top-level headings
+MD025: false  # Allow multiple H1s (common in multi-section docs)
+
+# MD026 - Trailing punctuation in headings
+MD026: false  # Allow any trailing punctuation
+
+# MD033 - Inline HTML
+MD033: false  # Allow HTML in markdown (badges, etc.)
+
+# MD034 - Bare URLs
+MD034: false  # Allow bare URLs
+
+# MD036 - Emphasis used instead of a heading
+MD036: false  # Allow bold text as pseudo-headings
+
+# MD040 - Fenced code blocks should have a language
+MD040: false  # Allow code blocks without language (output examples)
+
+# MD041 - First line should be a heading
+MD041: false  # Not required
+
+# MD022 - Blanks around headings
+MD022: false  # Don't require blank lines around headings
+
+# MD029 - Ordered list prefix
+MD029: false  # Allow any numbering style
+
+# MD031 - Blanks around fences
+MD031: false  # Don't require blank lines around code blocks
+
+# MD032 - Blanks around lists
+MD032: false  # Don't require blank lines around lists
+
+# MD058 - Blanks around tables
+MD058: false  # Don't require blank lines around tables
+
+# MD046 - Code block style
+MD046:
+  style: fenced  # Use ``` for code blocks
+
+# MD048 - Code fence style
+MD048:
+  style: backtick  # Use ``` not ~~~

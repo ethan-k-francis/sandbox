@@ -1,0 +1,90 @@
+# =============================================================================
+# pyproject.toml — Project Metadata, Dependencies, and Tool Config
+# =============================================================================
+# This is the single source of truth for the project. It replaces setup.py,
+# setup.cfg, requirements.txt, and tool-specific config files.
+#
+# Sections:
+#   [build-system]                  — How to build the package
+#   [project]                       — Name, version, description, dependencies
+#   [project.optional-dependencies] — Dev/test dependencies
+#   [project.scripts]               — CLI entry points
+#   [tool.*]                        — Config for ruff, pytest, mypy, etc.
+# =============================================================================
+
+# --- Build System ---
+# Tells pip which tool to use for building the package.
+# setuptools is the standard; hatchling and flit are lighter alternatives.
+[build-system]
+requires = ["setuptools>=68.0", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+# --- Project Metadata ---
+[project]
+name = "example-cli"
+version = "0.1.0"
+description = "Example CLI tool — template for Python projects"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+
+# Runtime dependencies — installed when someone does `pip install example-cli`
+# Pin minimum versions to avoid breaking changes from untested versions
+dependencies = [
+    "click>=8.1",          # CLI framework (better than argparse for most use cases)
+    "rich>=13.0",          # Pretty terminal output (colors, tables, progress bars)
+]
+
+# Optional dependency groups — installed with: pip install -e ".[dev]"
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",         # Test framework
+    "pytest-cov>=4.0",     # Coverage reporting
+    "ruff>=0.4",           # Linter + formatter (replaces flake8, isort, black)
+    "mypy>=1.8",           # Static type checker
+]
+
+# --- CLI Entry Point ---
+# This creates a `example-cli` command when the package is installed.
+# It calls the `main()` function in `example_cli.cli`.
+# So after `pip install -e .`, you can run: `example-cli --help`
+[project.scripts]
+example-cli = "example_cli.cli:main"
+
+# --- Tool Config ---
+
+# Ruff: fast Python linter and formatter (written in Rust)
+# Replaces flake8, isort, black, pycodestyle, pyflakes — all in one tool
+[tool.ruff]
+src = ["src"]              # Tell ruff where the source code is
+line-length = 100          # Max line length (100 is a good balance)
+target-version = "py310"   # Minimum Python version to target
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes (undefined names, unused imports)
+    "I",    # isort (import ordering)
+    "N",    # pep8-naming (function/variable naming conventions)
+    "UP",   # pyupgrade (use modern Python syntax)
+    "B",    # flake8-bugbear (common gotchas)
+    "SIM",  # flake8-simplify (simplifiable code)
+]
+
+# Pytest: test runner
+[tool.pytest.ini_options]
+testpaths = ["tests"]          # Where to find tests
+pythonpath = ["src"]           # Add src/ to Python path so imports work
+addopts = "-v --tb=short"     # Verbose output, short tracebacks
+
+# Mypy: static type checker
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true         # Warn if a function returns Any
+warn_unused_configs = true     # Warn if mypy config options are unused
+check_untyped_defs = true      # Type-check functions without annotations too
+
+# --- Package Discovery ---
+# Tells setuptools to look for packages inside src/
+[tool.setuptools.packages.find]
+where = ["src"]

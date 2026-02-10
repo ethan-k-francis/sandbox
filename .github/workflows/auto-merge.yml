@@ -1,0 +1,180 @@
+---
+# =============================================================================
+# Auto-Merge — Merge PRs automatically when CI passes
+# =============================================================================
+# Works on GitHub Free (private repos) WITHOUT branch protection rules.
+#
+# How to use:
+#   1. Open a PR, review the changes
+#   2. Add the "auto-merge" label (GitHub UI or: gh pr edit <num> --add-label auto-merge)
+#   3. Walk away — this workflow merges it when CI is green
+#
+# How it works:
+#   - Triggers when the "auto-merge" label is added to a PR
+#   - Also triggers when the CI workflow completes (catches label-first case)
+#   - Polls check status every 30s (up to 15 min) waiting for all checks to pass
+#   - If all pass, squash-merges and deletes the branch
+#
+# To cancel: remove the "auto-merge" label before checks finish.
+#
+# No repo settings changes needed — works out of the box on GitHub Free.
+# =============================================================================
+name: Auto-Merge
+
+"on":
+  # Trigger 1: When the "auto-merge" label is added to a PR.
+  # The workflow polls until checks finish (handles label-before-CI-done).
+  pull_request:
+    types: [labeled]
+
+  # Trigger 2: When CI finishes on a PR branch.
+  # Catches the case where CI finishes after the label was already added.
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+# Need write access to merge the PR and read checks
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+  actions: read
+
+jobs:
+  auto-merge:
+    name: Merge if CI passed
+    runs-on: ubuntu-latest
+    # 20 min timeout — enough for CI to finish + polling buffer
+    timeout-minutes: 20
+
+    # For workflow_run: always run (we check the label inside the job).
+    # For pull_request labeled: only run when the label is "auto-merge".
+    if: >
+      github.event_name == 'workflow_run' ||
+      (github.event_name == 'pull_request' && github.event.label.name == 'auto-merge')
+
+    steps:
+      # ----------------------------------------------------------------------
+      # Step 1: Find the PR number
+      # ----------------------------------------------------------------------
+      - name: Get PR number
+        id: pr
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "number=${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+          else
+            # workflow_run: find the PR for this branch
+            BRANCH="${{ github.event.workflow_run.head_branch }}"
+            PR_NUMBER=$(gh pr list --repo "${{ github.repository }}" \
+              --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
+
+            if [ -z "$PR_NUMBER" ]; then
+              echo "No open PR found for branch $BRANCH — skipping"
+              echo "number=" >> "$GITHUB_OUTPUT"
+            else
+              echo "number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ----------------------------------------------------------------------
+      # Step 2: Check if the PR has the "auto-merge" label
+      # ----------------------------------------------------------------------
+      - name: Check for auto-merge label
+        id: label
+        if: steps.pr.outputs.number != ''
+        run: |
+          HAS_LABEL=$(gh pr view "${{ steps.pr.outputs.number }}" \
+            --repo "${{ github.repository }}" \
+            --json labels --jq '[.labels[].name] | map(select(. == "auto-merge")) | length')
+
+          if [ "$HAS_LABEL" -gt 0 ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "PR #${{ steps.pr.outputs.number }} has auto-merge label"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "PR #${{ steps.pr.outputs.number }} does NOT have auto-merge label — skipping"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ----------------------------------------------------------------------
+      # Step 3: Poll until all checks pass (or timeout)
+      # ----------------------------------------------------------------------
+      # Instead of checking once and giving up, poll every 30 seconds.
+      # This handles the timing gap where the label is added before CI
+      # finishes. Polls up to 30 times (15 minutes).
+      # ----------------------------------------------------------------------
+      - name: Wait for all checks to pass
+        id: checks
+        if: steps.label.outputs.found == 'true'
+        run: |
+          PR="${{ steps.pr.outputs.number }}"
+          REPO="${{ github.repository }}"
+          MAX_ATTEMPTS=30
+          SLEEP_SECONDS=30
+
+          for attempt in $(seq 1 $MAX_ATTEMPTS); do
+            echo "=== Attempt $attempt/$MAX_ATTEMPTS ==="
+
+            # Re-check that the label still exists (user may have removed it)
+            HAS_LABEL=$(gh pr view "$PR" --repo "$REPO" \
+              --json labels --jq '[.labels[].name] | map(select(. == "auto-merge")) | length')
+            if [ "$HAS_LABEL" -eq 0 ]; then
+              echo "auto-merge label was removed — aborting"
+              echo "result=cancelled" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+
+            # Get check statuses via the API (more reliable than gh pr checks)
+            HEAD_SHA=$(gh pr view "$PR" --repo "$REPO" --json headRefOid --jq '.headRefOid')
+            CHECKS=$(gh api "repos/$REPO/commits/$HEAD_SHA/check-runs" \
+              --jq '.check_runs | map({name: .name, status: .status, conclusion: .conclusion})')
+
+            echo "Checks: $CHECKS"
+
+            # Filter out our own workflow to avoid circular dependency
+            PENDING=$(echo "$CHECKS" | jq -r '[.[] | select(.name != "Merge if CI passed" and .status != "completed")] | length')
+            FAILED=$(echo "$CHECKS" | jq -r '[.[] | select(.name != "Merge if CI passed" and .status == "completed" and .conclusion != "success" and .conclusion != "skipped" and .conclusion != "neutral")] | length')
+            TOTAL=$(echo "$CHECKS" | jq -r '[.[] | select(.name != "Merge if CI passed")] | length')
+
+            echo "Total: $TOTAL, Pending: $PENDING, Failed: $FAILED"
+
+            if [ "$TOTAL" -eq 0 ]; then
+              echo "No checks found yet — waiting..."
+            elif [ "$FAILED" -gt 0 ]; then
+              echo "Some checks failed — aborting auto-merge"
+              echo "$CHECKS" | jq -r '.[] | select(.status == "completed" and .conclusion != "success" and .conclusion != "skipped" and .conclusion != "neutral" and .name != "Merge if CI passed") | "  FAILED: \(.name) (\(.conclusion))"'
+              echo "result=failed" >> "$GITHUB_OUTPUT"
+              exit 0
+            elif [ "$PENDING" -eq 0 ]; then
+              echo "All $TOTAL checks passed!"
+              echo "result=passed" >> "$GITHUB_OUTPUT"
+              exit 0
+            else
+              echo "$PENDING checks still running — waiting ${SLEEP_SECONDS}s..."
+            fi
+
+            sleep "$SLEEP_SECONDS"
+          done
+
+          echo "Timed out waiting for checks after $((MAX_ATTEMPTS * SLEEP_SECONDS))s"
+          echo "result=timeout" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ----------------------------------------------------------------------
+      # Step 4: Squash-merge the PR
+      # ----------------------------------------------------------------------
+      - name: Merge PR
+        if: steps.checks.outputs.result == 'passed'
+        run: |
+          echo "Merging PR #${{ steps.pr.outputs.number }}..."
+          gh pr merge "${{ steps.pr.outputs.number }}" \
+            --repo "${{ github.repository }}" \
+            --squash \
+            --delete-branch
+          echo "PR #${{ steps.pr.outputs.number }} merged successfully"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

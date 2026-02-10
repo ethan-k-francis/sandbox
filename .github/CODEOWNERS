@@ -1,0 +1,11 @@
+# =============================================================================
+# CODEOWNERS — automatically request reviews for changes
+# =============================================================================
+# GitHub uses this file to suggest reviewers on pull requests.
+# Each line maps a file pattern to one or more GitHub usernames or teams.
+#
+# Docs: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+# =============================================================================
+
+# Default owner for everything in the repo
+* @ethan-k-francis

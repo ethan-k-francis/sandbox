@@ -1,0 +1,48 @@
+---
+# =============================================================================
+# Security Scanning Pipeline
+# =============================================================================
+# Scans code, configs, and dependencies for known vulnerabilities.
+#
+# Runs on PRs to main and weekly on a schedule to catch new CVEs.
+# =============================================================================
+name: Security
+
+"on":
+  pull_request:
+    branches: [main]
+  schedule:
+    # Every Monday at 06:00 UTC — catches new CVEs in between PRs
+    - cron: "0 6 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  # Needed by Trivy to upload SARIF results to GitHub Security tab
+  security-events: write
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Trivy — vulnerability scanning for code, configs, and dependencies
+  # ---------------------------------------------------------------------------
+  trivy:
+    name: Trivy Vulnerability Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # SHA-pinned for supply-chain security (tag: v6)
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      # SHA-pinned for supply-chain security (tag: 0.33.1)
+      - name: Run Trivy (filesystem mode — scans configs, deps, Dockerfiles)
+        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8 # 0.33.1
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          # HIGH and CRITICAL only — keeps noise low while catching real risks
+          severity: "HIGH,CRITICAL"
+          format: "table"
+          # Fail the build on HIGH/CRITICAL vulnerabilities in dependencies.
+          # This ensures known security issues don't slip through silently.
+          exit-code: "1"

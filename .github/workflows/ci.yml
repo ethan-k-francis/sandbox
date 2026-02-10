@@ -1,0 +1,107 @@
+---
+# =============================================================================
+# CI Pipeline - Lint and Validate
+# =============================================================================
+# Runs on every push and PR to validate code quality.
+# Pre-commit runs the full hook suite; advisory jobs catch additional issues.
+# =============================================================================
+name: CI
+
+"on":
+  push:
+    branches: [main, develop, "feature/*", "fix/*", "efrancis/*"]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Pre-commit (runs the same hooks as local development)
+  # ---------------------------------------------------------------------------
+  lint:
+    name: Pre-commit Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # SHA-pinned for supply-chain security (tag: v6)
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      # SHA-pinned for supply-chain security (tag: v6)
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      # Pre-commit clones hook repos from GitHub; without this token config,
+      # "git fetch" inside those clones fails with "could not read Username"
+      - name: Configure git for pre-commit hook repos
+        run: |
+          git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
+      - name: Install pre-commit
+        run: pip install pre-commit==4.1.0
+
+      # SHA-pinned for supply-chain security (tag: v5)
+      - name: Cache pre-commit hook environments
+        uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: |
+            pre-commit-
+
+      - name: Run pre-commit hooks
+        run: pre-commit run --all-files --show-diff-on-failure
+
+  # ---------------------------------------------------------------------------
+  # Advisory checks (show warnings, don't block merges)
+  # ---------------------------------------------------------------------------
+  lint-advisory:
+    name: Lint (Advisory)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      # SHA-pinned for supply-chain security (tag: v6)
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+
+      # SHA-pinned for supply-chain security (tag: v6)
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install linters
+        run: pip install ruff==0.8.6
+
+      - name: Python Lint (Ruff)
+        run: ruff check . || echo "::warning::Python lint issues found"
+
+      - name: Go Lint (golangci-lint)
+        run: |
+          # Only run if Go files exist
+          if find . -name "*.go" -type f | grep -q .; then
+            echo "Go files found, installing golangci-lint..."
+            curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin v1.61.0
+            golangci-lint run --timeout=5m || echo "::warning::Go lint issues found"
+          else
+            echo "No Go files found, skipping golangci-lint"
+          fi
+
+      # SHA-pinned for supply-chain security (tag: 2.0.0)
+      - name: ShellCheck
+        uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38
+        with:
+          scandir: "./scripts"
+          severity: error
+        continue-on-error: true
