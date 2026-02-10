@@ -71,7 +71,9 @@ func TestHealthEndpoint(t *testing.T) {
 
 	// Should return JSON with status "ok"
 	var body map[string]string
-	json.NewDecoder(resp.Body).Decode(&body)
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		t.Fatalf("Failed to decode response body: %v", err)
+	}
 	if body["status"] != "ok" {
 		t.Errorf("Expected status 'ok', got '%s'", body["status"])
 	}
@@ -107,7 +109,9 @@ func TestCreateAndListItems(t *testing.T) {
 	}
 
 	var items []map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&items)
+	if err := json.NewDecoder(resp.Body).Decode(&items); err != nil {
+		t.Fatalf("Failed to decode items response: %v", err)
+	}
 	if len(items) != 1 {
 		t.Errorf("Expected 1 item, got %d", len(items))
 	}

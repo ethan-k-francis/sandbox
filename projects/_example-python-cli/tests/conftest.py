@@ -21,22 +21,4 @@
 #       assert sample_config.debug is True
 # =============================================================================
 
-import pytest
-
-from example_cli.config import Config
-
-
-@pytest.fixture
-def default_config() -> Config:
-    """Provide a default Config instance for tests.
-
-    Tests that need specific config values should create their own Config
-    instead of modifying this one (keeps tests independent).
-    """
-    return Config()
-
-
-@pytest.fixture
-def debug_config() -> Config:
-    """Provide a Config with debug mode enabled."""
-    return Config(debug=True)
+# Add shared fixtures here as you write more tests.

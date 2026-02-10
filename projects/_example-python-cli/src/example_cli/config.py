@@ -47,8 +47,14 @@ def load_config() -> Config:
     Returns a Config instance with values from the environment where set,
     falling back to defaults for anything not specified.
     """
+    # Parse max_retries safely — fall back to default on non-integer input
+    try:
+        max_retries = int(os.getenv("EXAMPLE_CLI_MAX_RETRIES", str(Config.max_retries)))
+    except ValueError:
+        max_retries = Config.max_retries
+
     return Config(
         debug=os.getenv("EXAMPLE_CLI_DEBUG", "").lower() in ("1", "true", "yes"),
         greeting_template=os.getenv("EXAMPLE_CLI_GREETING_TEMPLATE", Config.greeting_template),
-        max_retries=int(os.getenv("EXAMPLE_CLI_MAX_RETRIES", str(Config.max_retries))),
+        max_retries=max_retries,
     )

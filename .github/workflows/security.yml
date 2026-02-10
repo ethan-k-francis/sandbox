@@ -10,7 +10,7 @@ name: Security
 
 "on":
   pull_request:
-    branches: [main]
+    branches: [main, develop]
   schedule:
     # Every Monday at 06:00 UTC — catches new CVEs in between PRs
     - cron: "0 6 * * 1"
@@ -18,8 +18,11 @@ name: Security
 
 permissions:
   contents: read
-  # Needed by Trivy to upload SARIF results to GitHub Security tab
-  security-events: write
+
+# Prevent overlapping scheduled + manual runs from wasting resources
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   # ---------------------------------------------------------------------------
