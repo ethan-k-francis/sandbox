@@ -29,13 +29,15 @@ _STYLE_MAP = {s.value: s for s in CaseStyle}
 @click.group(invoke_without_command=True)
 @click.option("-n", "--count", default=1, show_default=True, help="Number of usernames to generate")
 @click.option(
-    "-p", "--pattern",
+    "-p",
+    "--pattern",
     type=click.Choice(sorted(PATTERNS.keys()), case_sensitive=False),
     default=None,
     help="Username pattern (omit for weighted random)",
 )
 @click.option(
-    "-s", "--style",
+    "-s",
+    "--style",
     type=click.Choice(_STYLE_NAMES, case_sensitive=False),
     default=CaseStyle.PASCAL.value,
     show_default=True,
