@@ -45,6 +45,12 @@ _STYLE_MAP = {s.value: s for s in CaseStyle}
 )
 @click.option("--max-length", default=20, show_default=True, help="Max username length")
 @click.option("--allow-dupes", is_flag=True, help="Allow duplicate usernames in batch")
+@click.option(
+    "-i",
+    "--include",
+    default=None,
+    help="Word or number to include in every username",
+)
 @click.version_option()
 @click.pass_context
 def main(
@@ -54,6 +60,7 @@ def main(
     style: str,
     max_length: int,
     allow_dupes: bool,
+    include: str | None,
 ) -> None:
     """Generate fun random usernames — Reddit style."""
     # If a subcommand was invoked (e.g., `patterns`), don't generate
@@ -63,7 +70,9 @@ def main(
     case_style = _STYLE_MAP[style]
 
     if count == 1:
-        username = generate_username(pattern=pattern, style=case_style, max_length=max_length)
+        username = generate_username(
+            pattern=pattern, style=case_style, max_length=max_length, include=include
+        )
         console.print(f"[bold green]{username}[/bold green]")
     else:
         usernames = generate_batch(
@@ -72,6 +81,7 @@ def main(
             style=case_style,
             unique=not allow_dupes,
             max_length=max_length,
+            include=include,
         )
         for name in usernames:
             console.print(f"[bold green]{name}[/bold green]")
