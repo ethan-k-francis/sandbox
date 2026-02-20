@@ -32,6 +32,7 @@ def generate_username(
     pattern: str | None = None,
     style: CaseStyle = CaseStyle.PASCAL,
     max_length: int = MAX_USERNAME_LENGTH,
+    include: str | None = None,
 ) -> str:
     """Generate a single random username.
 
@@ -39,6 +40,9 @@ def generate_username(
         pattern: Pattern name from PATTERNS dict. None = weighted random.
         style: Casing style for the output.
         max_length: Maximum character length. Retries if exceeded.
+        include: A word or number to weave into the username. Replaces a
+                 random placeholder of matching type (alpha → noun slot,
+                 numeric → num slot).
 
     Returns:
         A random username string.
@@ -50,12 +54,16 @@ def generate_username(
         valid = ", ".join(sorted(PATTERNS.keys()))
         raise ValueError(f"Unknown pattern '{pattern}'. Valid patterns: {valid}")
 
+    # If include is a number, force a pattern that has {num} so it can be placed
+    if include and include.isdigit() and not pattern:
+        pattern = random.choice([k for k, v in PATTERNS.items() if "{num}" in v])
+
     # Retry loop — some word combos exceed max_length, so regenerate.
     # Bounded to prevent infinite loops on impossible constraints.
     for _ in range(50):
         selected_pattern = pattern or _pick_weighted_pattern()
         template = PATTERNS[selected_pattern]
-        tokens = _fill_template(template)
+        tokens = _fill_template(template, include=include)
         username = _apply_style(tokens, style)
 
         if len(username) <= max_length:
@@ -72,6 +80,7 @@ def generate_batch(
     style: CaseStyle = CaseStyle.PASCAL,
     unique: bool = True,
     max_length: int = MAX_USERNAME_LENGTH,
+    include: str | None = None,
 ) -> list[str]:
     """Generate multiple usernames at once.
 
@@ -81,13 +90,14 @@ def generate_batch(
         style: Casing style applied to all usernames.
         unique: If True, no duplicates in the batch.
         max_length: Maximum character length per username.
+        include: A word or number to weave into every generated username.
 
     Returns:
         List of generated usernames.
     """
     if not unique:
         return [
-            generate_username(pattern=pattern, style=style, max_length=max_length)
+            generate_username(pattern=pattern, style=style, max_length=max_length, include=include)
             for _ in range(count)
         ]
 
@@ -100,7 +110,9 @@ def generate_batch(
     for _ in range(max_attempts):
         if len(results) >= count:
             break
-        username = generate_username(pattern=pattern, style=style, max_length=max_length)
+        username = generate_username(
+            pattern=pattern, style=style, max_length=max_length, include=include
+        )
         if username not in seen:
             seen.add(username)
             results.append(username)
@@ -119,7 +131,7 @@ def _pick_weighted_pattern() -> str:
     return random.choices(names, weights=weights, k=1)[0]
 
 
-def _fill_template(template: str) -> list[str]:
+def _fill_template(template: str, *, include: str | None = None) -> list[str]:
     """Replace placeholders in a pattern template with random words.
 
     Returns a list of tokens (words and numbers) rather than a concatenated
@@ -128,7 +140,19 @@ def _fill_template(template: str) -> list[str]:
 
     Literal text between placeholders (like "the" in "the{adj}{noun}")
     is preserved as its own token.
+
+    If `include` is provided, it replaces one placeholder of matching type:
+      - Numeric string → replaces first {num} slot
+      - Alphabetic string → replaces first {noun} slot (most natural position)
     """
+    # Decide which placeholder type the include word should replace.
+    # Numbers go into {num} slots; words go into {noun} slots since
+    # that's the most natural-sounding position for a custom word.
+    include_target: str | None = None
+    if include:
+        include_target = "num" if include.isdigit() else "noun"
+    include_used = False
+
     tokens: list[str] = []
     remainder = template
 
@@ -145,9 +169,13 @@ def _fill_template(template: str) -> list[str]:
         if match.start() > 0:
             tokens.append(remainder[: match.start()])
 
-        # Replace the placeholder with a random word
+        # Replace the placeholder with a random word (or the include word)
         placeholder = match.group(1)
-        if placeholder == "adj":
+
+        if not include_used and placeholder == include_target and include:
+            tokens.append(include)
+            include_used = True
+        elif placeholder == "adj":
             tokens.append(random.choice(ADJECTIVES))
         elif placeholder == "noun":
             tokens.append(random.choice(NOUNS))
@@ -157,6 +185,10 @@ def _fill_template(template: str) -> list[str]:
             tokens.append(str(random.randint(MIN_NUMBER, MAX_NUMBER)))
 
         remainder = remainder[match.end() :]
+
+    # If include wasn't placed (e.g., no matching slot), append it as a suffix
+    if include and not include_used:
+        tokens.append(include)
 
     return tokens
 
