@@ -43,8 +43,16 @@ username-gen -s UPPERCASE      # BRAVEFALCON42
 username-gen -s snake_case     # brave_falcon_42
 username-gen -s kebab-case     # brave-falcon-42
 
+# Include a specific word (replaces noun slot)
+username-gen -i wolf -n 5        # ElectricWolf42, SwiftWolf, ...
+username-gen -i dragon -p agent  # CosmicDragon, SilentDragon, ...
+
+# Include a specific number (replaces num slot)
+username-gen -i 42 -n 5          # BraveFalcon42, LynxCrasher42, ...
+
 # Combine options
 username-gen -n 5 -p verber -s snake_case
+username-gen -n 5 -i phoenix -s kebab-case
 
 # Max length constraint
 username-gen --max-length 12
@@ -71,8 +79,14 @@ name = generate_username()
 # With options
 name = generate_username(pattern="verber", style=CaseStyle.SNAKE)
 
-# Batch
-names = generate_batch(10, unique=True)
+# Include a custom word
+name = generate_username(include="wolf")
+
+# Include a custom number
+name = generate_username(include="42", pattern="classic")
+
+# Batch with include
+names = generate_batch(10, unique=True, include="ninja")
 ```
 
 ## Project Structure
