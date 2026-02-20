@@ -131,6 +131,46 @@ class TestVerbify:
         assert _verbify("build") == "builder"
 
 
+class TestInclude:
+    """Tests for the --include feature (custom word/number injection)."""
+
+    def test_include_word_appears_in_output(self) -> None:
+        """A custom word should appear somewhere in the generated username."""
+        for _ in range(20):
+            result = generate_username(include="phoenix")
+            assert "phoenix" in result.lower()
+
+    def test_include_number_appears_in_output(self) -> None:
+        """A custom number should appear in the generated username."""
+        for _ in range(20):
+            result = generate_username(include="42")
+            assert "42" in result
+
+    def test_include_word_with_pattern(self) -> None:
+        """Include should work with an explicit pattern."""
+        result = generate_username(pattern="classic", include="dragon")
+        assert "dragon" in result.lower()
+
+    def test_include_number_forces_num_pattern(self) -> None:
+        """A numeric include without explicit pattern should pick a {num} pattern."""
+        for _ in range(20):
+            result = generate_username(include="99")
+            assert "99" in result
+
+    def test_include_in_batch(self) -> None:
+        """Include should apply to every username in a batch."""
+        results = generate_batch(5, include="wolf")
+        for name in results:
+            assert "wolf" in name.lower()
+
+    def test_include_with_styles(self) -> None:
+        """Include should work across all casing styles."""
+        result_snake = generate_username(include="ninja", style=CaseStyle.SNAKE)
+        assert "ninja" in result_snake
+        result_kebab = generate_username(include="ninja", style=CaseStyle.KEBAB)
+        assert "ninja" in result_kebab
+
+
 class TestApplyStyle:
     """Tests for the internal style application function."""
 
