@@ -18,23 +18,24 @@ from enum import Enum
 
 class CaseStyle(Enum):
     """How to capitalize the final username."""
-    PASCAL = "PascalCase"      # BraveFalcon42 (Reddit-style default)
-    LOWER = "lowercase"        # bravefalcon42
-    UPPER = "UPPERCASE"        # BRAVEFALCON42
-    SNAKE = "snake_case"       # brave_falcon_42
-    KEBAB = "kebab-case"       # brave-falcon-42
+
+    PASCAL = "PascalCase"  # BraveFalcon42 (Reddit-style default)
+    LOWER = "lowercase"  # bravefalcon42
+    UPPER = "UPPERCASE"  # BRAVEFALCON42
+    SNAKE = "snake_case"  # brave_falcon_42
+    KEBAB = "kebab-case"  # brave-falcon-42
 
 
 # Each pattern is a tuple of (name, template_string, description).
 # The generator picks a random pattern (or a specific one by name).
 # Weighted toward patterns that produce the best-sounding usernames.
 PATTERNS: dict[str, str] = {
-    "classic": "{adj}{noun}{num}",           # BraveFalcon42 — the Reddit standard
-    "duo": "{adj}{adj}{noun}",               # QuietBoldTiger — double adjective
-    "agent": "{adj}{noun}",                  # SilentWolf — clean, no number
-    "verber": "{noun}{verb}",                # StarGazer — noun + action
+    "classic": "{adj}{noun}{num}",  # BraveFalcon42 — the Reddit standard
+    "duo": "{adj}{adj}{noun}",  # QuietBoldTiger — double adjective
+    "agent": "{adj}{noun}",  # SilentWolf — clean, no number
+    "verber": "{noun}{verb}",  # StarGazer — noun + action
     "numbered_verber": "{noun}{verb}{num}",  # MoonWalker99
-    "the": "the{adj}{noun}",                 # TheSwiftFox — definite article
+    "the": "the{adj}{noun}",  # TheSwiftFox — definite article
 }
 
 # Default pattern weights for random selection — higher weight = more likely.
