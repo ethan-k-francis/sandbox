@@ -30,7 +30,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--spider", "--quiet", "http://localhost:80"]
+      test: ["CMD-SHELL", "wget --spider --quiet http://localhost:80 || curl -fsS http://localhost:80 > /dev/null"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -67,11 +67,11 @@ services:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "wget --spider --quiet http://localhost:3000 || exit 1"]
+      test: ["CMD-SHELL", "node -e \"const http = require('http'); http.get('http://localhost:3000/status', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1));\""]
       interval: 15s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 45s
 
   # -- PostgreSQL Database ----------------------------------------------------
   # Stores notes, users, revisions, and session data.
