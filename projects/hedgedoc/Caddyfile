@@ -1,0 +1,46 @@
+# =============================================================================
+# Caddy — Reverse Proxy for HedgeDoc
+#
+# Why Caddy over Nginx:
+#   - Automatic HTTPS with Let's Encrypt (zero config for production)
+#   - Built-in compression (gzip, zstd) without extra modules
+#   - 15 lines vs 80+ lines of Nginx config for the same result
+#
+# Local dev:  Caddy serves HTTP on :80, proxies to HedgeDoc on :3000.
+# Production: Change `:80` to your domain (e.g., notes.example.com)
+#             and Caddy automatically provisions a TLS certificate.
+# =============================================================================
+
+:80 {
+	# Proxy all traffic to HedgeDoc. The `app` hostname resolves via
+	# Docker's internal DNS to the HedgeDoc container.
+	reverse_proxy app:3000
+
+	# Compress responses to reduce bandwidth. Zstd is faster than gzip
+	# but not all clients support it — Caddy negotiates automatically.
+	encode zstd gzip
+
+	# Security headers that don't break HedgeDoc's functionality.
+	header {
+		# Prevent MIME-type sniffing (stops browsers from guessing content types)
+		X-Content-Type-Options nosniff
+
+		# Block the page from being loaded in an iframe (clickjacking protection)
+		X-Frame-Options SAMEORIGIN
+
+		# Enable XSS filtering in older browsers
+		X-XSS-Protection "1; mode=block"
+
+		# Control what info is sent in the Referer header
+		Referrer-Policy strict-origin-when-cross-origin
+
+		# Remove the Server header to avoid leaking version info
+		-Server
+	}
+
+	# Access logs for debugging and audit trails
+	log {
+		output stdout
+		format console
+	}
+}
