@@ -1,0 +1,20 @@
+# Environment (contains auto-generated secrets)
+.env
+
+# Override the repo-root .gitignore which ignores .env.example globally.
+# We need .env.example committed as the configuration template.
+!.env.example
+
+# Persistent data (Docker volumes bind-mounted here in dev)
+data/
+
+# Backups (can be large, keep local)
+backups/
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# OS junk
+.DS_Store
+Thumbs.db
