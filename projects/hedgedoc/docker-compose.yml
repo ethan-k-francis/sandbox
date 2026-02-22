@@ -1,0 +1,107 @@
+# =============================================================================
+# HedgeDoc — Docker Compose Stack
+#
+# Three services:
+#   caddy     — reverse proxy (port 80/443), handles TLS, compression, headers
+#   app       — HedgeDoc collaborative markdown editor
+#   database  — PostgreSQL backend for notes, users, and revision history
+#
+# Usage:
+#   make up      — start everything (runs setup if needed)
+#   make down    — stop everything
+#   make logs    — tail all logs
+# =============================================================================
+
+services:
+  # -- Caddy Reverse Proxy ----------------------------------------------------
+  # Sits in front of HedgeDoc so users hit port 80 (or 443 with TLS) instead
+  # of the raw :3000. Adds compression, security headers, and clean URLs.
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "${HEDGEDOC_PORT:-80}:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "--quiet", "http://localhost:80"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # -- HedgeDoc Application ---------------------------------------------------
+  # Real-time collaborative markdown editor with revision history,
+  # presentation mode, and full-text search built in.
+  app:
+    image: quay.io/hedgedoc/hedgedoc:1.10.6
+    environment:
+      - CMD_DB_URL=postgres://${POSTGRES_USER:-hedgedoc}:${POSTGRES_PASSWORD:-hedgedoc}@database:5432/${POSTGRES_DB:-hedgedoc}
+      - CMD_DOMAIN=${HEDGEDOC_DOMAIN:-localhost}
+      - CMD_URL_ADDPORT=${CMD_URL_ADDPORT:-false}
+      - CMD_PROTOCOL_USESSL=${CMD_PROTOCOL_USESSL:-false}
+      - CMD_SESSION_SECRET=${CMD_SESSION_SECRET:?Set CMD_SESSION_SECRET in .env}
+      - CMD_ALLOW_ANONYMOUS=${CMD_ALLOW_ANONYMOUS:-true}
+      - CMD_ALLOW_ANONYMOUS_EDITS=${CMD_ALLOW_ANONYMOUS_EDITS:-true}
+      - CMD_ALLOW_FREEURL=${CMD_ALLOW_FREEURL:-true}
+      - CMD_DEFAULT_PERMISSION=${CMD_DEFAULT_PERMISSION:-editable}
+      - CMD_ENABLE_STATS_API=${CMD_ENABLE_STATS_API:-true}
+      - CMD_EMAIL=${CMD_EMAIL:-true}
+      - CMD_ALLOW_EMAIL_REGISTER=${CMD_ALLOW_EMAIL_REGISTER:-true}
+      - CMD_IMAGE_UPLOAD_TYPE=${CMD_IMAGE_UPLOAD_TYPE:-filesystem}
+      - CMD_ALLOW_GRAVATAR=false
+      - NODE_ENV=production
+    volumes:
+      - uploads:/hedgedoc/public/uploads
+      - ./config/default.md:/hedgedoc/public/default.md:ro
+    expose:
+      - "3000"
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider --quiet http://localhost:3000 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # -- PostgreSQL Database ----------------------------------------------------
+  # Stores notes, users, revisions, and session data.
+  # Alpine variant keeps the image small (~80MB vs ~400MB full).
+  database:
+    image: postgres:17-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-hedgedoc}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-hedgedoc}
+      - POSTGRES_DB=${POSTGRES_DB:-hedgedoc}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-hedgedoc} -d ${POSTGRES_DB:-hedgedoc}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+# -- Volumes ------------------------------------------------------------------
+# Named volumes persist data across container restarts and rebuilds.
+volumes:
+  db_data:
+    driver: local
+  uploads:
+    driver: local
+  caddy_data:
+    driver: local
+  caddy_config:
+    driver: local
