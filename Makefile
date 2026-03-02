@@ -9,7 +9,7 @@
 # =============================================================================
 
 .PHONY: help setup-hooks lint lint-fix lint-update lint-yaml lint-markdown lint-python \
-       test clean update-deps git-clean-branches git-status
+       ci ci-security pr-attribution-check test clean update-deps git-clean-branches git-status
 
 # Default target
 .DEFAULT_GOAL := help
@@ -68,6 +68,23 @@ lint-python: ## Lint Python files only
 	@echo "$(CYAN)Linting Python...$(NC)"
 	@ruff check . 2>/dev/null || echo "$(YELLOW)Install: pip install ruff$(NC)"
 	@ruff format --check . 2>/dev/null || true
+
+ci: lint ci-security pr-attribution-check ## Run local CI parity checks before PR
+	@echo "$(GREEN)Local CI checks passed$(NC)"
+
+ci-security: ## Run local security parity checks (Trivy)
+	@echo "$(CYAN)Running security checks...$(NC)"
+	@command -v trivy >/dev/null 2>&1 || (echo "$(YELLOW)Install trivy: https://trivy.dev/latest/getting-started/installation/$(NC)" && exit 1)
+	@trivy fs --severity HIGH,CRITICAL --exit-code 1 .
+
+pr-attribution-check: ## Check branch commits and optional PR text for forbidden attribution
+	@echo "$(CYAN)Running attribution guard...$(NC)"
+	@chmod +x .github/scripts/attribution-guard.sh
+	@.github/scripts/attribution-guard.sh \
+		--base-ref origin/main \
+		$${PR_TITLE:+--title "$${PR_TITLE}"} \
+		$${PR_BODY_FILE:+--body-file "$${PR_BODY_FILE}"}
+	@echo "$(GREEN)Attribution guard passed$(NC)"
 
 # =============================================================================
 # Development
