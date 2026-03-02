@@ -37,6 +37,9 @@ pip install pre-commit && pre-commit install
 
 # 3. See all available commands
 make help
+
+# 4. Run local CI parity checks before opening PR
+make ci
 ```
 
 ## How to Create a New Project
@@ -226,4 +229,5 @@ make lint-fix          # Auto-fix lint issues
 make clean             # Remove generated files
 make git-status        # Branch status and sync info
 make git-clean-branches  # Delete merged branches
+make ci                # Run local CI parity checks before PR
 ```
