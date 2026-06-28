@@ -16,7 +16,7 @@
 # Tells pip which tool to use for building the package.
 # setuptools is the standard; hatchling and flit are lighter alternatives.
 [build-system]
-requires = ["setuptools>=68.0", "setuptools-scm"]
+requires = ["setuptools>=82.0.1", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 # --- Project Metadata ---
@@ -31,17 +31,17 @@ license = {text = "MIT"}
 # Runtime dependencies — installed when someone does `pip install example-cli`
 # Pin minimum versions to avoid breaking changes from untested versions
 dependencies = [
-    "click>=8.1",          # CLI framework (better than argparse for most use cases)
-    "rich>=13.0",          # Pretty terminal output (colors, tables, progress bars)
+    "click>=8.4.2",          # CLI framework (better than argparse for most use cases)
+    "rich>=15.0.0",          # Pretty terminal output (colors, tables, progress bars)
 ]
 
 # Optional dependency groups — installed with: pip install -e ".[dev]"
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.0",         # Test framework
-    "pytest-cov>=4.0",     # Coverage reporting
-    "ruff>=0.4",           # Linter + formatter (replaces flake8, isort, black)
-    "mypy>=1.8",           # Static type checker
+    "pytest>=9.1.1",         # Test framework
+    "pytest-cov>=7.1.0",     # Coverage reporting
+    "ruff>=0.15.20",           # Linter + formatter (replaces flake8, isort, black)
+    "mypy>=2.1.0",           # Static type checker
 ]
 
 # --- CLI Entry Point ---
