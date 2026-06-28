@@ -33,19 +33,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      # SHA-pinned for supply-chain security (tag: v6)
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      # SHA-pinned for supply-chain security (tag: 0.33.1)
-      - name: Run Trivy (filesystem mode — scans configs, deps, Dockerfiles)
-        uses: aquasecurity/trivy-action@e368e328979b113139d6f9068e03accaed98a518 # 0.34.1
-        with:
-          scan-type: "fs"
-          scan-ref: "."
-          # HIGH and CRITICAL only — keeps noise low while catching real risks
-          severity: "HIGH,CRITICAL"
-          format: "table"
-          # Fail the build on HIGH/CRITICAL vulnerabilities in dependencies.
-          # This ensures known security issues don't slip through silently.
-          exit-code: "1"
+      # Direct install avoids trivy-action bootstrap failures on GitHub runners.
+      - name: Install Trivy
+        run: |
+          set -euo pipefail
+          curl -fsSL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | \
+            sh -s -- -b /usr/local/bin v0.69.2
+
+      - name: Run Trivy filesystem scan
+        run: |
+          set -euo pipefail
+          trivy fs --severity HIGH,CRITICAL --exit-code 1 .
