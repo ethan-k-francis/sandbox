@@ -14,15 +14,7 @@ venv/
 *.egg-info/
 .eggs/
 
-# Local hooks (stay local only)
-.githooks/
-
-# IDE context (local only — never commit to public repo)
-AGENTS.md
-.cursor/
-cursor-environment/
-
-# IDE and OS
+# Python
 .idea/
 .vscode/
 *.code-workspace
