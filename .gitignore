@@ -17,7 +17,7 @@ venv/
 # Local hooks (stay local only)
 .githooks/
 
-# AI / IDE context (local only — never commit to public repo)
+# IDE context (local only — never commit to public repo)
 AGENTS.md
 .cursor/
 cursor-environment/

@@ -18,7 +18,6 @@ sandbox/
 │   ├── your-experiment-name/     # Your actual projects
 │   └── ...
 ├── .github/workflows/            # CI/CD pipelines
-├── AGENTS.md                     # Project context for AI and humans
 ├── Makefile                      # Repo-level commands (make help)
 ├── .pre-commit-config.yaml       # Git hooks for linting
 ├── .gitignore                    # Ignores build artifacts, secrets, IDE files
