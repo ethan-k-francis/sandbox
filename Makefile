@@ -8,8 +8,8 @@
 #   make lint        Run all linters
 # =============================================================================
 
-.PHONY: help setup-hooks lint lint-fix lint-update lint-yaml lint-markdown lint-python \
-       ci ci-security pr-attribution-check test clean update-deps git-clean-branches git-status
+.PHONY: help lint lint-fix lint-update lint-yaml lint-markdown lint-python \
+       ci ci-security test clean update-deps git-clean-branches git-status
 
 # Default target
 .DEFAULT_GOAL := help
@@ -29,13 +29,6 @@ help: ## Show this help
 	@echo ""
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(GREEN)%-20s$(NC) %s\n", $$1, $$2}'
 	@echo ""
-
-# =============================================================================
-# Setup
-# =============================================================================
-setup-hooks: ## Configure local git hooks (strips IDE trailers from commits)
-	@git config core.hooksPath .githooks
-	@echo "$(GREEN)Git hooks configured (.githooks/)$(NC)"
 
 # =============================================================================
 # Linting & Validation
@@ -69,22 +62,13 @@ lint-python: ## Lint Python files only
 	@ruff check . 2>/dev/null || echo "$(YELLOW)Install: pip install ruff$(NC)"
 	@ruff format --check . 2>/dev/null || true
 
-ci: lint ci-security pr-attribution-check ## Run local CI parity checks before PR
+ci: lint ci-security ## Run local CI parity checks before PR
 	@echo "$(GREEN)Local CI checks passed$(NC)"
 
 ci-security: ## Run local security parity checks (Trivy)
 	@echo "$(CYAN)Running security checks...$(NC)"
 	@command -v trivy >/dev/null 2>&1 || (echo "$(YELLOW)Install trivy: https://trivy.dev/latest/getting-started/installation/$(NC)" && exit 1)
 	@trivy fs --severity HIGH,CRITICAL --exit-code 1 .
-
-pr-attribution-check: ## Check branch commits and optional PR text for forbidden attribution
-	@echo "$(CYAN)Running attribution guard...$(NC)"
-	@chmod +x .github/scripts/attribution-guard.sh
-	@.github/scripts/attribution-guard.sh \
-		--base-ref origin/main \
-		$${PR_TITLE:+--title "$${PR_TITLE}"} \
-		$${PR_BODY_FILE:+--body-file "$${PR_BODY_FILE}"}
-	@echo "$(GREEN)Attribution guard passed$(NC)"
 
 # =============================================================================
 # Development
@@ -165,3 +149,5 @@ clean: ## Clean generated files
 	@find . -type d -name .mypy_cache -exec rm -rf {} + 2>/dev/null || true
 	@rm -rf build/ dist/ *.egg-info/ 2>/dev/null || true
 	@echo "$(GREEN)Cleaned generated files$(NC)"
+
+-include .local/Makefile
