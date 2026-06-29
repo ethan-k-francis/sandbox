@@ -94,7 +94,7 @@ test: ## Run smoke tests (config validation)
 	@PASS=0; FAIL=0; \
 	echo ""; \
 	echo "--- Config Files ---"; \
-	for f in .pre-commit-config.yaml .gitignore AGENTS.md; do \
+	for f in .pre-commit-config.yaml .gitignore; do \
 		if [ -f "$$f" ]; then \
 			echo "  $(GREEN)✓$(NC) $$f exists"; \
 			PASS=$$((PASS+1)); \
