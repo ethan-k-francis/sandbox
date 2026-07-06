@@ -16,7 +16,7 @@
 # Tells pip which tool to use for building the package.
 # setuptools is the standard; hatchling and flit are lighter alternatives.
 [build-system]
-requires = ["setuptools>=82.0.1", "setuptools-scm"]
+requires = ["setuptools>=83.0.0", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 # --- Project Metadata ---
