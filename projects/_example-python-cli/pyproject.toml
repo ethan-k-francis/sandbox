@@ -40,8 +40,8 @@ dependencies = [
 dev = [
     "pytest>=9.1.1",         # Test framework
     "pytest-cov>=7.1.0",     # Coverage reporting
-    "ruff>=0.16.5",           # Linter + formatter (replaces flake8, isort, black)
-    "mypy>=2.3.1",           # Static type checker
+    "ruff>=0.17.1",           # Linter + formatter (replaces flake8, isort, black)
+    "mypy>=2.4.0",           # Static type checker
 ]
 
 # --- CLI Entry Point ---
