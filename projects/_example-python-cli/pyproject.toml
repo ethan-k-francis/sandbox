@@ -16,7 +16,7 @@
 # Tells pip which tool to use for building the package.
 # setuptools is the standard; hatchling and flit are lighter alternatives.
 [build-system]
-requires = ["setuptools>=84.0.0", "setuptools-scm"]
+requires = ["setuptools>=84.2.1", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
 # --- Project Metadata ---
@@ -40,8 +40,8 @@ dependencies = [
 dev = [
     "pytest>=9.1.1",         # Test framework
     "pytest-cov>=7.1.0",     # Coverage reporting
-    "ruff>=0.16.5",           # Linter + formatter (replaces flake8, isort, black)
-    "mypy>=2.3.1",           # Static type checker
+    "ruff>=0.17.2",           # Linter + formatter (replaces flake8, isort, black)
+    "mypy>=2.4.0",           # Static type checker
 ]
 
 # --- CLI Entry Point ---
